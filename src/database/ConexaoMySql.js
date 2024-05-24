@@ -5,7 +5,7 @@ const dbConfig = {
     port: '3306',
     user: 'root',
     password: 'senai',
-    database: 'cadastro_estudante',
+    database: 'cadastro_usuario',
 };
 
 class ConexaoMySql {

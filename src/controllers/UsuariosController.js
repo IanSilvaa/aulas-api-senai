@@ -5,16 +5,15 @@ class UsuariosController {
         try {
             const filtro = req.query.filtro || '';
             const conexao = await new ConexaoMySql().getConexao();
-            const sql = 'SELECT * FROM dados_estudantes WHERE nome LIKE ?';
+            const sql = 'SELECT * FROM dados_usuario WHERE nome LIKE ?';
             const [resultado] = await conexao.execute(sql, [`%${filtro}%`]);
 
-            resp.send(resultado);
-            // resp.send(
-            //     resultado.map((u) => {
-            //         delete u.senha;
-            //         return u;
-            //     })
-            // );
+            resp.send(
+                resultado.map((u) => {
+                    delete u.senha;
+                    return u;
+                })
+            );
         } catch (error) {
             resp.status(500).send(error)
         };
@@ -24,14 +23,18 @@ class UsuariosController {
         try {
             const novoUsuario = req.body;
 
-            if (!novoUsuario.nome || !novoUsuario.matricula) {
-                resp.status(400).send('Os campos nome e matricula são obrigatórios!');
+            if (!novoUsuario.nome || !novoUsuario.email || !novoUsuario.senha) {
+                resp.status(400).send('Os campos nome, email e senha são obrigatórios!');
                 return;
             }
 
             const conexao = await new ConexaoMySql().getConexao();
-            const sql = 'INSERT INTO dados_estudantes (nome, matricula) VALUES (?,?)';
-            const [resultado] = await conexao.execute(sql, [novoUsuario.nome, novoUsuario.matricula]);
+            const sql = 'INSERT INTO dados_usuario (nome, email, senha) VALUES (?,?,?)';
+            const [resultado] = await conexao.execute(sql, [
+                novoUsuario.nome, 
+                novoUsuario.email, 
+                novoUsuario.senha
+            ]);
 
             resp.send(resultado);
         } catch (error) {
@@ -43,17 +46,17 @@ class UsuariosController {
         try {
         const usuarioEditar = req.body;
 
-        if (!usuarioEditar.nome || !usuarioEditar.matricula) {
-            resp.status(400).send('Os campos nome e matricula são obrigatórios para atualizar!');
+        if (!usuarioEditar.nome || !usuarioEditar.email) {
+            resp.status(400).send('Os campos nome e email são obrigatórios para atualizar!');
             return;
         }
 
         const conexao = await new ConexaoMySql().getConexao();
-        const sql = 'UPDATE dados_estudantes SET nome = ?, matricula = ? WHERE id_dados_estudantes = ?';
+        const sql = 'UPDATE dados_usuario SET nome = ?, email = ? WHERE id_dados_usuario = ?';
         const [resultado] = await conexao.execute(sql, [
             usuarioEditar.nome, 
-            usuarioEditar.matricula,
-            usuarioEditar.id_dados_estudantes
+            usuarioEditar.email,
+            usuarioEditar.id_dados_usuario
         ]);
 
         resp.send(resultado);
@@ -63,9 +66,9 @@ class UsuariosController {
 
     async excluir(req, resp) {
         try {
-            +req.params.idUsuario;
+            // +req.params.idUsuario;
             const conexao = await new ConexaoMySql().getConexao();
-            const sql = 'DELETE FROM dados_estudantes WHERE id_dados_estudantes = ?';
+            const sql = 'DELETE FROM dados_usuario WHERE id_dados_usuario = ?';
             const [resultado] = await conexao.execute(sql, [+req.params.idUsuario]);
 
             resp.send(resultado);
